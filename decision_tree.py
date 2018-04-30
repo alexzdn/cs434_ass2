@@ -119,6 +119,19 @@ def print_tree(node, depth=0):
 	else:
 		print('%s[%s]' % ((depth*' ', node)))
 
+# Make a prediction with a decision tree
+def predict(node, row):
+	if row[node['index']] < node['value']:
+		if isinstance(node['left'], dict):
+			return predict(node['left'], row)
+		else:
+			return node['left']
+	else:
+		if isinstance(node['right'], dict):
+			return predict(node['right'], row)
+		else:
+			return node['right']
+
 data = np.genfromtxt('knn_train.csv', delimiter=',')
 #normalize(data[:, 1:np.size(data, 1)])
 #data now properly defined
@@ -136,5 +149,14 @@ data = [[-1,2.771244718,1.784783929],
 '''
 #split = find_best_split(data)
 #print('Split: [X%d < %.3f]' % ((split['index']), split['value']))
-tree = build_tree(data, 4, 1)
+tree = build_tree(data, 1, 1)
 print_tree(tree)
+
+numErrors = 0
+for row in data:
+	prediction = predict(tree, row)
+	if row[0] * prediction < 0:
+		numErrors+=1
+	print('Expected=%d, Got=%d' % (row[0], prediction))
+
+print("Number of errors: " + str(numErrors))
